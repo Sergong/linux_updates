@@ -4,11 +4,9 @@
   include_tasks: "check-debian-reboot.yml"
   listen: check reboot debian
   when: ansible_os_family == "Debian"
-  become: true
 
 # Handler for Redhat and derivative distros
 - name: Reboot handler for redhat
   include_tasks: "check-redhat-reboot.yml"
   listen: check reboot redhat
   when: ansible_os_family == "RedHat"
-  become: true

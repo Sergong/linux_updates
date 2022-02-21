@@ -1,11 +1,13 @@
 ---
-- name: Check if reboot file exists
-  stat:
-    path: /var/run/reboot-required
-  register: reboot
+- block:
+  - name: Check if reboot file exists
+    stat:
+      path: /var/run/reboot-required
+    register: reboot
 
-- name: Reboot the host if required
-  reboot:
-    msg: "apt upgrade required a reboot"
-  when:
-    - reboot.stat.exists
+  - name: Reboot the host if required
+    reboot:
+      msg: "apt upgrade required a reboot"
+    when:
+      - reboot.stat.exists
+  become: true
