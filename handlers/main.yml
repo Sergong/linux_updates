@@ -23,10 +23,13 @@
     register: reboot
     listen: Check Reboot
 
-  - name: Reboot the host if required
-    reboot:
-      msg: "apt upgrade required a reboot"
-    listen: Check Reboot
-    when: reboot.
+  - name: Display the results
+    debug:
+      var: reboot
+  # - name: Reboot the host if required
+  #   reboot:
+  #     msg: "apt upgrade required a reboot"
+  #   listen: Check Reboot
+  #   when: reboot.
   when: ansible_os_family == "RedHat"
   become: true
