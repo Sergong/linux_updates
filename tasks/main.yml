@@ -1,0 +1,5 @@
+---
+- name: Run updates for {{ ansible_os_family | lower }} family OS'es
+  include_tasks: "tasks/install-{{ ansible_os_family | lower }}-updates.yml"
+
+

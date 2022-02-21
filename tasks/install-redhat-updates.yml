@@ -1,0 +1,16 @@
+---
+# Sequence of update tasks for Redhat and derivate OSes
+- block:
+  - name: Ensure needs-restarting package is installed
+    dnf:
+      name: yun-utils
+      state: present
+  
+  - name: Ensure all packages are updated to the latest version
+    dnf:
+      name: '*'
+      state: latest
+    register: updates
+    notify: Check Reboot
+
+  become: true

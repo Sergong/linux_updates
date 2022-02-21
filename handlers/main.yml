@@ -1,0 +1,32 @@
+---
+# Block for Debian and derivative distros
+- block:
+  - name: Check if reboot file exists
+    stat:
+      path: /var/run/reboot-required
+    register: reboot
+    listen: Check Reboot
+
+  - name: Reboot the host if required
+    reboot:
+      msg: "apt upgrade required a reboot"
+    listen: Check Reboot
+    when:
+      - reboot.stat.exists
+  when: ansible_os_family == "Debian"
+  become: true
+
+# Block for Redhat and derivative distros
+- block:
+  - name: Check if reboot is needed
+    shell: needs-restarting -r
+    register: reboot
+    listen: Check Reboot
+
+  - name: Reboot the host if required
+    reboot:
+      msg: "apt upgrade required a reboot"
+    listen: Check Reboot
+    when: reboot.
+  when: ansible_os_family == "RedHat"
+  become: true
