@@ -11,6 +11,6 @@
       name: '*'
       state: latest
     register: updates
-    notify: Check Reboot
+    notify: check reboot redhat
 
   become: true

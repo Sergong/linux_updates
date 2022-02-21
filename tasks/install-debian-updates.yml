@@ -11,7 +11,7 @@
       name: '*'
       state: latest
     register: updates
-    notify: Check Reboot
+    notify: check reboot debian
 
   - name: Ensure Autoremove runs when suggested by apt upgrade
     apt:
