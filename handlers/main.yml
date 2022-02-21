@@ -1,12 +1,10 @@
 ---
 # Handler for Debian and derivative distros
-- name: Reboot handler for debian
+- name: check reboot debian
   include_tasks: "check-debian-reboot.yml"
-  listen: check reboot debian
   when: ansible_os_family == "Debian"
 
 # Handler for Redhat and derivative distros
-- name: Reboot handler for redhat
+- name: check reboot redhat
   include_tasks: "check-redhat-reboot.yml"
-  listen: check reboot redhat
   when: ansible_os_family == "RedHat"
