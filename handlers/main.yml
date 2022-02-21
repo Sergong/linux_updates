@@ -19,7 +19,8 @@
 # Block for Redhat and derivative distros
 - block:
   - name: Check if reboot is needed
-    shell: needs-restarting -r
+    command: needs-restarting -r
+    changed_when: false
     register: reboot
     listen: Check Reboot
 
