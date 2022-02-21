@@ -3,7 +3,7 @@
 - block:
   - name: Ensure needs-restarting package is installed
     dnf:
-      name: yun-utils
+      name: yum-utils
       state: present
   
   - name: Ensure all packages are updated to the latest version
