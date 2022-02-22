@@ -4,6 +4,7 @@
     command: needs-restarting -r
     changed_when: false
     register: reboot
+    ignore_errors: true
 
   - name: Reboot the host if required
     reboot:
