@@ -9,6 +9,6 @@
   - name: Reboot the host if required
     reboot:
       msg: "yum upgrade requires a reboot"
-    when: reboot.rc > 0
+    when: reboot.rc == 1
     
   become: true
