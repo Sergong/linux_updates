@@ -10,6 +10,7 @@
     dnf:
       name: '*'
       state: latest
+      allowerasing: true
     register: updates
     notify: check reboot redhat
 
