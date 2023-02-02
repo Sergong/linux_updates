@@ -1,7 +1,8 @@
 galaxy_info:
   author: Serge Meeuwsen
-  description: Role dev
+  description: Simple Linux Update Role for Debian and RHEL distros
   company: My company
+  namespace: sergong
 
   # If the issue tracker for your role is not on github, uncomment the
   # next line and provide a value
