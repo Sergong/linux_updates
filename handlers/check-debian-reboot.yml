@@ -7,6 +7,10 @@
         path: /var/run/reboot-required
       register: reboot
 
+    - name: Display the reboot status
+      ansible.builtin.debug:
+        var: reboot.stat
+
     - name: Reboot the host if required
       ansible.builtin.reboot:
         msg: "apt upgrade required a reboot"
