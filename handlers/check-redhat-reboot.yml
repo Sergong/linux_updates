@@ -1,14 +1,14 @@
 ---
-- block:
-  - name: Check if reboot is needed
-    command: needs-restarting -r
-    changed_when: false
-    register: reboot
-    ignore_errors: true
-
-  - name: Reboot the host if required
-    reboot:
-      msg: "yum upgrade requires a reboot"
-    when: reboot.rc == 1
-    
+- name: Reboot Tasks RedHat
   become: true
+  block:
+    - name: Check if reboot is needed
+      ansible.builtin.command: needs-restarting -r
+      changed_when: false
+      register: reboot
+      ignore_errors: true
+
+    - name: Reboot the host if required
+      ansible.builtin.reboot:
+        msg: "yum upgrade requires a reboot"
+      when: reboot.rc == 1

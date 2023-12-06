@@ -1,20 +1,21 @@
 ---
 # Sequence of update tasks for Debian and derivate OSes
-- block:
-  - name: Ensure Apt Cache is up-to-date
-    apt:
-      update_cache: true
-    changed_when: false
-
-  - name: Ensure all packages are updated to the latest version
-    apt:
-      name: '*'
-      state: latest
-    register: updates
-    notify: check reboot debian
-
-  - name: Ensure Autoremove runs when suggested by apt upgrade
-    apt:
-      autoremove: true
-    when: '"Use ''sudo apt autoremove'' to remove it" in updates.stdout'
+- name: Update tasks
   become: true
+  block:
+    - name: Ensure Apt Cache is up-to-date
+      ansible.builtin.apt:
+        update_cache: true
+      changed_when: false
+
+    - name: Ensure all packages are updated to the latest version # noqa: package-latest
+      ansible.builtin.apt:
+        name: '*'
+        state: latest
+      register: updates
+      notify: check reboot debian
+
+    - name: Ensure Autoremove runs when suggested by apt upgrade
+      ansible.builtin.apt:
+        autoremove: true
+      when: '"Use ''sudo apt autoremove'' to remove it" in updates.stdout'

@@ -1,6 +1,7 @@
 ---
 # Currently supported families are RedHat and Debian
-- name: call update tasks depending on the distro family
-  include_tasks: "tasks/install-{{ ansible_os_family | lower }}-updates.yml"
+- name: Ensure we've gathered facts
+  ansible.builtin.setup:
 
-
+- name: Call update tasks depending on the distro family
+  ansible.builtin.include_tasks: "tasks/install-{{ ansible_os_family | lower }}-updates.yml"

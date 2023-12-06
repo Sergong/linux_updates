@@ -1,17 +1,16 @@
 ---
 # Sequence of update tasks for Redhat and derivate OSes
-- block:
-  - name: Ensure needs-restarting package is installed
-    dnf:
-      name: yum-utils
-      state: present
-  
-  - name: Ensure all packages are updated to the latest version
-    dnf:
-      name: '*'
-      state: latest
-      allowerasing: true
-    register: updates
-    notify: check reboot redhat
-
+- name: Update Tasks RedHat
   become: true
+  block:
+    - name: Ensure needs-restarting package is installed
+      ansible.builtin.dnf:
+        name: yum-utils
+        state: present
+
+    - name: Ensure all packages are updated to the latest version # noqa: package-latest
+      ansible.builtin.dnf:
+        name: '*'
+        state: latest
+      register: updates
+      notify: check reboot redhat
