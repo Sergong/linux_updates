@@ -1,6 +1,6 @@
 ---
 - name: Test role on localhost
   hosts: localhost
-  roles:
-    - ../
 
+  roles:
+    - ../linux_updates
