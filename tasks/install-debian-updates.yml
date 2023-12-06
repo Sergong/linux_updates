@@ -13,7 +13,7 @@
         name: '*'
         state: latest
       register: updates
-      notify: check reboot debian
+      notify: Check reboot debian
 
     - name: Ensure Autoremove runs when suggested by apt upgrade
       ansible.builtin.apt:

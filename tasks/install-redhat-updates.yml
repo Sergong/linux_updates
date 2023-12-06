@@ -13,4 +13,4 @@
         name: '*'
         state: latest
       register: updates
-      notify: check reboot redhat
+      notify: Check reboot redhat
