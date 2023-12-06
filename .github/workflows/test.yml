@@ -27,5 +27,5 @@ jobs:
           pip install ansible
 
       - name: Run Ansible Role Test
-        run: ansible-playbook test/test.yml -i test/inventory
+        run: ansible-playbook test/test.yml -i test/inventory --check --diff
 
