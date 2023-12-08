@@ -2,7 +2,7 @@
 # Currently supported families are RedHat and Debian
 - name: Ensure we've gathered facts if required
   ansible.builtin.setup:
-  when: ansible_os_family is not defined
+  when: ansible_os_family is undefined
 
 - name: Call update tasks depending on the distro family
   ansible.builtin.include_tasks: "tasks/install-{{ ansible_os_family | lower }}-updates.yml"
