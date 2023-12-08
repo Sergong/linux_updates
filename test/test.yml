@@ -1,6 +1,7 @@
 ---
 - name: Test role on localhost
   hosts: localhost
+  gather_facts: false
 
   roles:
     - ../linux_updates
