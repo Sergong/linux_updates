@@ -8,10 +8,11 @@
         update_cache: true
       changed_when: false
 
-    - name: Ensure all packages are updated to the latest version # noqa: package-latest
+    - name: Ensure all packages are updated to the latest version using full-upgrade # noqa: package-latest
       ansible.builtin.apt:
         name: '*'
         state: latest
+        upgrade: 'full'
       register: updates
       notify: Check reboot debian
 
