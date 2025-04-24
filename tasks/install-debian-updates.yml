@@ -17,4 +17,4 @@
     - name: Ensure Autoremove runs when suggested by apt upgrade
       ansible.builtin.apt:
         autoremove: true
-      when: '"Use ''sudo apt autoremove'' to remove it" in updates.stdout'
+      when: '"Use ''sudo apt autoremove'' to remove " in updates.stdout'
