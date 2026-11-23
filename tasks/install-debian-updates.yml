@@ -9,7 +9,7 @@
       APT::Periodic::Update-Package-Lists "0";
       APT::Periodic::Unattended-Upgrade "0";
     mode: "0644"
-  when: ansible_distribution == "Ubuntu"
+  when: ansible_facts['distribution'] == "Ubuntu"
 
 - name: Update apt cache, repairing known problems if it fails
   become: true
