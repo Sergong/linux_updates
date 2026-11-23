@@ -1,6 +1,16 @@
 ---
 # Sequence of update tasks for Debian and derivate OSes
 
+- name: Disable unattended upgrades (Ansible manages updates)
+  become: true
+  ansible.builtin.copy:
+    dest: /etc/apt/apt.conf.d/20auto-upgrades
+    content: |
+      APT::Periodic::Update-Package-Lists "0";
+      APT::Periodic::Unattended-Upgrade "0";
+    mode: "0644"
+  when: ansible_distribution == "Ubuntu"
+
 - name: Update apt cache, repairing leftover package state if needed
   become: true
   block:
