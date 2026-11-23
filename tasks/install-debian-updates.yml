@@ -26,7 +26,11 @@
       failed_when: false
 
     - name: Get package states
-      ansible.builtin.command: dpkg-query -W -f=${db:Status-Abbrev}|${binary:Package}\n
+      ansible.builtin.command:
+        argv:
+          - dpkg-query
+          - -W
+          - -f=${db:Status-Abbrev}|${binary:Package}\n
       register: linux_updates_dpkg_states
       changed_when: false
 
