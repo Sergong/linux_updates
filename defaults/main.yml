@@ -1,0 +1,20 @@
+# --- Add to roles/linux_updates/defaults/main.yml ---------------------------
+
+# Dispatch table for repairing a failed apt cache update.
+# Each repair runs only when its trigger matches:
+#   stderr:     regex searched in the real `apt-get update` error output
+#   dpkg_state: regex matched against dpkg status abbreviations (e.g. "rc", "iU")
+# The name maps to tasks/apt-repairs/<name>.yml. Matching repairs run in list order.
+linux_updates_apt_repairs:
+  - name: purge-rc-packages      # removed packages with config files left behind
+    dpkg_state: "^rc"
+  - name: configure-pending      # unpacked / half-installed / failed-config / awaiting triggers
+    dpkg_state: "^.[UFHWt]"
+
+# Packages that must never be auto-purged, even when in 'rc' state.
+# Regex patterns, matched against the full package name.
+linux_updates_purge_exclude:
+  - "mariadb-server.*"
+  - "mysql-server.*"
+  - "postgresql.*"
+  - "docker-ce.*"

@@ -1,0 +1,36 @@
+---
+# Repair: purge packages that were removed but left config files behind (dpkg state 'rc').
+# Packages matching linux_updates_purge_exclude are never purged (case 1: purge scripts
+# can remove data directories or users, not just config files).
+
+- name: List packages in 'rc' state
+  ansible.builtin.set_fact:
+    linux_updates_rc_all: >-
+      {{ linux_updates_dpkg_states.stdout_lines
+         | select('match', '^rc')
+         | map('split', '|') | map('last')
+         | list }}
+
+- name: Split into packages to purge and packages to keep
+  ansible.builtin.set_fact:
+    linux_updates_rc_excluded: >-
+      {{ linux_updates_rc_all | select('match', '^(' ~ (linux_updates_purge_exclude | join('|')) ~ ')(:[a-z0-9]+)?$') | list
+         if linux_updates_purge_exclude | length > 0 else [] }}
+
+- name: Packages to purge
+  ansible.builtin.set_fact:
+    linux_updates_rc_to_purge: "{{ linux_updates_rc_all | difference(linux_updates_rc_excluded) }}"
+
+- name: Report excluded packages (left untouched)
+  ansible.builtin.debug:
+    msg: "Not purging excluded package(s): {{ linux_updates_rc_excluded | join(', ') }}"
+  when: linux_updates_rc_excluded | length > 0
+
+- name: Purge leftover config files of removed packages
+  become: true
+  ansible.builtin.command:
+    argv: "{{ ['dpkg', '--purge'] + linux_updates_rc_to_purge }}"
+  environment:
+    DEBIAN_FRONTEND: noninteractive
+  changed_when: true
+  when: linux_updates_rc_to_purge | length > 0

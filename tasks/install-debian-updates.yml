@@ -11,7 +11,7 @@
     mode: "0644"
   when: ansible_distribution == "Ubuntu"
 
-- name: Update apt cache, repairing leftover package state if needed
+- name: Update apt cache, repairing known problems if it fails
   become: true
   block:
     - name: Ensure Apt Cache is up-to-date
@@ -19,41 +19,44 @@
         update_cache: true
 
   rescue:
-    - name: Show the real apt error (the apt module only says "unknown reason") # noqa: command-instead-of-module
+    - name: Capture the real apt error (the apt module only reports "unknown reason")  # noqa: command-instead-of-module
       ansible.builtin.command: apt-get update
-      register: apt_raw
+      register: linux_updates_apt_raw
       changed_when: false
       failed_when: false
 
-    - name: Display apt-get output
-      ansible.builtin.debug:
-        var: apt_raw.stderr_lines
-
-    - name: List package states
+    - name: Get package states
       ansible.builtin.command: dpkg-query -W -f=${db:Status-Abbrev}|${binary:Package}\n
-      register: dpkg_states
+      register: linux_updates_dpkg_states
       changed_when: false
 
-    - name: Find packages that were removed but left config files behind (state 'rc')
+    - name: Select the repairs that match this failure
       ansible.builtin.set_fact:
-        rc_packages: >-
-          {{ dpkg_states.stdout_lines
-             | select('match', '^rc')
-             | map('split', '|') | map('last') | list }}
+        linux_updates_matched_repairs: "{{ linux_updates_matched_repairs | default([]) + [item.name] }}"
+      loop: "{{ linux_updates_apt_repairs }}"
+      loop_control:
+        label: "{{ item.name }}"
+      when: >-
+        (item.stderr is defined and linux_updates_apt_raw.stderr is search(item.stderr))
+        or (item.dpkg_state is defined and
+            (linux_updates_dpkg_states.stdout_lines | select('match', item.dpkg_state) | list | length > 0))
 
-    - name: Purge leftover config files of removed packages # noqa: no-changed-when
-      ansible.builtin.command:
-        argv: "{{ ['dpkg', '--purge'] + rc_packages }}"
-      when: rc_packages | length > 0
+    - name: No known repair for this error (default case)
+      ansible.builtin.fail:
+        msg: "apt update failed and no repair matched. apt-get output:\n{{ linux_updates_apt_raw.stderr }}"
+      when: linux_updates_matched_repairs | default([]) | length == 0
 
-    - name: Finish any interrupted package configuration
-      ansible.builtin.command: dpkg --configure -a
-      register: dpkg_configure
-      changed_when: dpkg_configure.stdout | length > 0
+    - name: Run matching repairs
+      ansible.builtin.include_tasks: "apt-repairs/{{ item }}.yml"
+      loop: "{{ linux_updates_matched_repairs }}"
 
     - name: Retry apt cache update after repair
       ansible.builtin.apt:
         update_cache: true
+
+    - name: Report repairs performed
+      ansible.builtin.debug:
+        msg: "{{ inventory_hostname }}: apt cache update repaired by {{ linux_updates_matched_repairs | join(', ') }}"
 
 - name: Ensure all packages are updated to the latest version using full-upgrade # noqa: package-latest
   ansible.builtin.apt:

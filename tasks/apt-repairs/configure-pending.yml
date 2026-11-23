@@ -1,0 +1,19 @@
+---
+# Repair: finish configuring packages left unpacked, half-installed, half-configured
+# or awaiting triggers.
+# Runs non-interactively and keeps existing config files (case 2): without this, a
+# config-file prompt would hang the play because Ansible has no terminal.
+
+- name: Finish pending package configuration
+  become: true
+  ansible.builtin.command:
+    argv:
+      - dpkg
+      - --configure
+      - -a
+      - --force-confdef
+      - --force-confold
+  environment:
+    DEBIAN_FRONTEND: noninteractive
+  register: linux_updates_dpkg_configure
+  changed_when: linux_updates_dpkg_configure.stdout | length > 0
