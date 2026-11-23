@@ -1,6 +1,6 @@
 ---
-- name: Test role on localhost
+- name: Test role on localhost # noqa: role-name[path]
   hosts: localhost
 
   roles:
-    - ../linux_updates
+    - ../linux_updates    

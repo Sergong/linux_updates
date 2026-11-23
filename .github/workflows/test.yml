@@ -27,5 +27,6 @@ jobs:
           pip install ansible
 
       - name: Run Ansible Role Test
+        env:
+          ANSIBLE_ROLES_PATH: ${{ github.workspace }}/..      
         run: ansible-playbook test/test.yml -i test/inventory --check --diff
-
