@@ -1,20 +1,59 @@
 ---
 # Sequence of update tasks for Debian and derivate OSes
-- name: Update tasks
+
+- name: Update apt cache, repairing leftover package state if needed
   become: true
   block:
     - name: Ensure Apt Cache is up-to-date
       ansible.builtin.apt:
         update_cache: true
+
+  rescue:
+    - name: Show the real apt error (the apt module only says "unknown reason") # noqa: command-instead-of-module
+      ansible.builtin.command: apt-get update
+      register: apt_raw
+      changed_when: false
+      failed_when: false
+
+    - name: Display apt-get output
+      ansible.builtin.debug:
+        var: apt_raw.stderr_lines
+
+    - name: List package states
+      ansible.builtin.command: dpkg-query -W -f=${db:Status-Abbrev}|${binary:Package}\n
+      register: dpkg_states
       changed_when: false
 
-    - name: Ensure all packages are updated to the latest version using full-upgrade # noqa: package-latest
-      ansible.builtin.apt:
-        upgrade: 'full'
-      register: updates
-      notify: Check reboot debian
+    - name: Find packages that were removed but left config files behind (state 'rc')
+      ansible.builtin.set_fact:
+        rc_packages: >-
+          {{ dpkg_states.stdout_lines
+             | select('match', '^rc')
+             | map('split', '|') | map('last') | list }}
 
-    - name: Ensure Autoremove runs when suggested by apt upgrade
+    - name: Purge leftover config files of removed packages # noqa: no-changed-when
+      ansible.builtin.command:
+        argv: "{{ ['dpkg', '--purge'] + rc_packages }}"
+      when: rc_packages | length > 0
+
+    - name: Finish any interrupted package configuration
+      ansible.builtin.command: dpkg --configure -a
+      register: dpkg_configure
+      changed_when: dpkg_configure.stdout | length > 0
+
+    - name: Retry apt cache update after repair
       ansible.builtin.apt:
-        autoremove: true
-      when: '"Use ''sudo apt autoremove'' to remove " in updates.stdout'
+        update_cache: true
+
+- name: Ensure all packages are updated to the latest version using full-upgrade # noqa: package-latest
+  ansible.builtin.apt:
+    upgrade: 'full'
+  register: updates
+  notify: Check reboot debian
+  become: true
+
+- name: Ensure Autoremove runs when suggested by apt upgrade
+  ansible.builtin.apt:
+    autoremove: true
+  when: '"Use ''sudo apt autoremove'' to remove " in updates.stdout'
+  become: true
